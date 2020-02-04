@@ -67,8 +67,18 @@ public class RecommenderService {
             i=recommendedIsbns.size();
             is++;
         }
-        return recommendedIsbns.stream().sorted(Comparator.comparing(x -> bookRatingRepository.getBookRating(x)))
-                .limit(5).map(x -> bookRatingRepository.findBookAndRatingById(x)).collect(Collectors.toList());
+//        return recommendedIsbns.stream().sorted(Comparator.comparing(x -> bookRatingRepository.getBookRating(x)))
+//                .limit(5).map(x -> bookRatingRepository.findBookAndRatingById(x)).collect(Collectors.toList());
+        List<IBookAndRating> result = new ArrayList<>();
+        int resultSize = 0;
+        for(String isbn: recommendedIsbns) {
+            IBookAndRating b = bookRatingRepository.findBookAndRatingById(isbn);
+            if(b!=null && resultSize<5) {
+                result.add(b);
+                resultSize++;
+            }
+        }
+        return result;
     }
 
     /** returns the utility maxtrix for the recommender; meant for internal use and testing */

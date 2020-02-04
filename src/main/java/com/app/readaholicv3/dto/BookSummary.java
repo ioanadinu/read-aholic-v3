@@ -31,13 +31,15 @@ public class BookSummary implements Serializable {
     }
 
     public BookSummary(IBookAndRating iBookAndRating) {
-        this.isbn = iBookAndRating.getIsbn();
-        this.title = iBookAndRating.getBook_Title();
-        this.author = iBookAndRating.getBook_Author();
-        this.imageUrlS = iBookAndRating.getImage_Url_S();
-        this.imageUrlM = iBookAndRating.getImage_Url_M();
-        this.imageUrlL = iBookAndRating.getImage_Url_L();
-        this.rating = iBookAndRating.getAverage() == null ? 0f : iBookAndRating.getAverage()/2;
+        if(iBookAndRating != null) {
+            this.isbn = iBookAndRating.getIsbn();
+            this.title = iBookAndRating.getBook_Title();
+            this.author = iBookAndRating.getBook_Author();
+            this.imageUrlS = iBookAndRating.getImage_Url_S();
+            this.imageUrlM = iBookAndRating.getImage_Url_M();
+            this.imageUrlL = iBookAndRating.getImage_Url_L();
+            this.rating = iBookAndRating.getAverage() == null ? 0f : iBookAndRating.getAverage() / 2;
+        }
     }
 
     public String getIsbn() {

@@ -156,8 +156,8 @@ public class BookService {
         List<IBookReview> iBookReviewList = reviewRepository.findReviewsForBook(isbn);
         return iBookReviewList.stream()
                 .map(r -> {
-                    Integer rating = this.bookRatingRepository.findByBookRatingIdUserIdAndBookRatingIdIsbn(r.getUser_Id(), isbn).getBookRating();
-                    Float ratingF = rating==null ? 0f : rating/2f;
+                    BookRating rating = this.bookRatingRepository.findByBookRatingIdUserIdAndBookRatingIdIsbn(r.getUser_Id(), isbn);
+                    Float ratingF = rating==null ? 0f : rating.getBookRating()/2f;
                     return new BookReview(r.getUsername(), ratingF, r.getText());
                 })
                 .collect(toList());
