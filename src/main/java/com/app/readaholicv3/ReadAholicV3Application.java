@@ -8,6 +8,8 @@ public class ReadAholicV3Application {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ReadAholicV3Application.class, args);
+//		AddAdmin addAdmin = new AddAdmin();
+//		addAdmin.addAdmin();
 	}
 
 }

@@ -10,9 +10,9 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
+import java.util.Arrays;
 
-@Component
+//@Component
 public class AddAdmin {
 
     @Autowired
@@ -24,16 +24,16 @@ public class AddAdmin {
     @Autowired
     private UserRepository userRepository;
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void AddAdmin() {
+//    @EventListener(ApplicationReadyEvent.class)
+    public void addAdmin() {
         User admin = userService.findByEmail("alexa.murgoci@gmail.com");
         if(admin==null) {
             admin = new User();
-            admin.setUsername("admin");
+            admin.setUsername("SuperAdmin");
             admin.setEmail("alexa.murgoci@gmail.com");
             admin.setPassword(userService.encodePassword("secret"));
             admin.setActive(true);
-            admin.setRoles(Collections.singletonList(roleRepository.findByName(RoleName.ROLE_ADMIN)));
+            admin.setRoles(Arrays.asList(roleRepository.findByName(RoleName.ROLE_USER), roleRepository.findByName(RoleName.ROLE_ADMIN)));
             userRepository.save(admin);
         }
     }
