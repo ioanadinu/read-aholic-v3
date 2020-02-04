@@ -12,7 +12,9 @@ import java.util.List;
 
 @Repository
 public interface BookRatingRepository extends JpaRepository<BookRating, BookRatingId> {
-    //List<BookRating> findTop10GroupByIdOrderByAvgBookRating();
+
+    BookRating findByBookRatingIdUserIdAndBookRatingIdIsbn(Long userId, String isbn);
+
     /** intoarce istoricul voturilor unui user identificat prin id */
     @Query(value = "SELECT * FROM bx_book_ratings WHERE user_id=?1",
             nativeQuery = true)
@@ -22,10 +24,6 @@ public interface BookRatingRepository extends JpaRepository<BookRating, BookRati
             nativeQuery=true)
     Float getBookRating(String isbn);
 
-    @Query(value = "SELECT AVG(book_rating) FROM public.bx_book_ratings;",
-            nativeQuery = true)
-    Float getAvg();
-
     /** get the 10 best books relative to popularity and average rating */
     @Query(value = "SELECT bx_books.isbn, book_title, book_author, year_of_publication, publisher, image_url_s, image_url_m, image_url_l, average\n" +
             "FROM bx_books, \n" +
@@ -34,16 +32,9 @@ public interface BookRatingRepository extends JpaRepository<BookRating, BookRati
             "GROUP BY isbn) as selection\n" +
             "WHERE bx_books.isbn=selection.isbn\n" +
             "ORDER BY average DESC\n" +
-            "LIMIT 10;",
+            "LIMIT 12;",
             nativeQuery = true)
-    List<IBookAndRating> getTop10();
-
-    /** intoarce istoricul voturilor unui user identificat prin id */
-    @Query(value = "SELECT bx_books.isbn,book_title,book_author,book_rating\n" +
-            "FROM public.bx_book_ratings, public.bx_books\n" +
-            "WHERE bx_book_ratings.isbn = bx_books.isbn AND bx_book_ratings.user_id = ?1",
-            nativeQuery = true)
-    List<IUserHistoryItem> getUserHistory(Long id);
+    List<IBookAndRating> getTop12();
 
     @Query(value = "SELECT bx_books.isbn, book_title, book_author, year_of_publication, publisher, image_url_s, image_url_m, image_url_l, average\n" +
             "FROM public.bx_books, \n" +

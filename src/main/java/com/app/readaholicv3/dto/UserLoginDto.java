@@ -1,19 +1,23 @@
 package com.app.readaholicv3.dto;
 
+import javax.validation.constraints.NotEmpty;
+
 public class UserLoginDto {
-    private String username;
+    @NotEmpty
+    private String email;
+    @NotEmpty
     private String password;
 
     public UserLoginDto() {
     }
 
-    public UserLoginDto(String username, String password) {
-        this.username = username;
+    public UserLoginDto(String email, String password) {
+        this.email = email;
         this.password = password;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
     public String getPassword() {

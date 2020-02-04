@@ -25,7 +25,7 @@ public class SecurityHttpInterceptor extends HandlerInterceptorAdapter {
     private static final String USER_PASSWORD_HEADER = "user-password";
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Override
     public boolean preHandle(HttpServletRequest requestServlet, HttpServletResponse responseServlet, Object handler) throws Exception
@@ -34,10 +34,9 @@ public class SecurityHttpInterceptor extends HandlerInterceptorAdapter {
         LOGGER.info(url);
 
         Set<RoleName> roles = getRequiredRolesForUrl(url);
+        List<String> headers = Collections.list(requestServlet.getHeaderNames());
         if(roles.isEmpty())
             return true;
-
-        List<String> headers = Collections.list(requestServlet.getHeaderNames());
 
         if(!headers.contains(USER_EMAIL_HEADER) || !headers.contains((USER_PASSWORD_HEADER))) {
             responseServlet.setStatus(HttpStatus.FORBIDDEN.value());

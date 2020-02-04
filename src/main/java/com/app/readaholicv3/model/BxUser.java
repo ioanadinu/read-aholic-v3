@@ -23,6 +23,12 @@ public class BxUser {
     public BxUser() {
     }
 
+    public BxUser(Long id, String location, Integer age) {
+        this.id = id;
+        this.location = location;
+        this.age = age;
+    }
+
     public BxUser(User user) {
         this.id = user.getId();
         this.age = user.getAge();

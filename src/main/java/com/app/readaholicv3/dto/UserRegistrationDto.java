@@ -80,4 +80,16 @@ public class UserRegistrationDto {
     public void setTerms(Boolean terms) {
         this.terms = terms;
     }
+
+    @Override
+    public String toString() {
+        return "UserRegistrationDto{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", confirmPassword='" + confirmPassword + '\'' +
+                ", email='" + email + '\'' +
+                ", confirmEmail='" + confirmEmail + '\'' +
+                ", terms=" + terms +
+                '}';
+    }
 }

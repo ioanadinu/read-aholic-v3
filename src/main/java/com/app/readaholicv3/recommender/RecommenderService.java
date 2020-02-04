@@ -16,23 +16,17 @@ import java.util.stream.Collectors;
 public class RecommenderService {
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    BookRatingRepository bookRatingRepository;
+    private BookRatingRepository bookRatingRepository;
 
     @Autowired
-    BookRepository bookRepository;
-
-    /** gives 5 IBookAndRating items based on user cosine similarity and
-     * book keywords extracted from their goodreads descriptions*/
-    public List<IBookAndRating> recommendForUserAddedBookSimilarity(User user) {
-
-        return null;
-    }
+    private BookRepository bookRepository;
 
     /** gives 5 IBookAndRating items based on user cosine similarity */
     public List<IBookAndRating> recommendForUser(User user) {
+        if(bookRatingRepository.findRatingsByUserId(user.getId()).size() < 3) return Collections.emptyList();
 
         SortedMap<Long, SortedMap<String, Integer> > utilityMatrix = makeUtilityMatrix();
         SortedMap<Long, Float> similarityList = new TreeMap<>();
@@ -57,8 +51,6 @@ public class RecommenderService {
             }
             similarityList.put(id,(float)(sumProducts/(Math.sqrt(sumUser*sumOtherUser))));
         }
-//        Float best = similarityList.values().stream().filter(x -> x!=1).max(Comparator.naturalOrder()).get();
-//        Long id = similarityList.keySet().stream().filter(x -> similarityList.get(x).equals(best)).findFirst().get();
         List<Long> userIdSorted= usersIdSet.stream().filter(x -> similarityList.get(x)!=1).sorted(Comparator.comparing(x -> similarityList.get(x)).reversed()).collect(Collectors.toList());
         int nrCarti = 5;
         int i=0;
@@ -79,12 +71,8 @@ public class RecommenderService {
                 .limit(5).map(x -> bookRatingRepository.findBookAndRatingById(x)).collect(Collectors.toList());
     }
 
-    /*public List<Book> recommend(List<BookRating> bookRatings) {
-        return null;
-    }*/
-
     /** returns the utility maxtrix for the recommender; meant for internal use and testing */
-    public SortedMap<Long, SortedMap<String, Integer> > makeUtilityMatrix() {
+    private SortedMap<Long, SortedMap<String, Integer> > makeUtilityMatrix() {
         List<BookRating> bookRatingList = bookRatingRepository.findAll();
         SortedMap<Long, SortedMap<String, Integer> > utilityMatrix = new TreeMap<>();
         for(BookRating bookRating : bookRatingList) {

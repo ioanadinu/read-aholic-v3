@@ -1,7 +1,6 @@
 package com.app.readaholicv3.service;
 
-import com.app.readaholicv3.dto.IBookAndRating;
-import com.app.readaholicv3.dto.IBookReview;
+import com.app.readaholicv3.dto.*;
 import com.app.readaholicv3.model.Book;
 import com.app.readaholicv3.model.BookRating;
 import com.app.readaholicv3.model.BookRatingId;
@@ -10,13 +9,22 @@ import com.app.readaholicv3.repository.BookRatingRepository;
 import com.app.readaholicv3.repository.BookRepository;
 import com.app.readaholicv3.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class BookService {
@@ -41,8 +49,12 @@ public class BookService {
     }
 
     /** get the 10 best books relative to popularity and average rating */
-    public List<IBookAndRating> getTop10() {
-        return bookRatingRepository.getTop10();
+    public List<IBookAndRating> getTop12() {
+        return bookRatingRepository.getTop12();
+    }
+
+    public BookRating getBookRatingOfUser(Long userId, String isbn) {
+        return this.bookRatingRepository.findByBookRatingIdUserIdAndBookRatingIdIsbn(userId, isbn);
     }
 
     public IBookAndRating getBookAndRatingById(String isbn) {
@@ -62,13 +74,31 @@ public class BookService {
         bookRatingRepository.save(bookRating);
     }
 
-    public void saveBookRating(BookRating bookRating) {
-        bookRatingRepository.save(bookRating);
+    public void deleteBookRating(Long userId, String isbn) {
+        bookRatingRepository.deleteById(new BookRatingId(userId, isbn));
     }
 
     /** return list of items that contain the parameter in the isbn, title or author*/
-    public List<IBookAndRating> getSearchResults(String searchParameter) {
-        return bookRepository.findSearchResults(searchParameter);
+    @Transactional
+    public CustomPageImpl<BookSummary> getSearchResults(String searchParameter, Integer page) {
+        Pageable pageRequest = PageRequest.of(page, 10, Sort.by("title"));
+        Page<Book> books = searchParameter!= null ?
+                bookRepository.findAllByIsbnContainingIgnoreCaseOrTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(searchParameter, searchParameter, searchParameter, pageRequest) :
+                bookRepository.findAll(pageRequest);
+        return new CustomPageImpl<>(books.stream()
+                .map(b -> {
+                    Float rating = bookRatingRepository.getBookRating(b.getIsbn());
+                    return new BookSummary(
+                            b.getIsbn(),
+                            b.getTitle(),
+                            b.getAuthor(),
+                            b.getImageUrlS(),
+                            b.getImageUrlM(),
+                            b.getImageUrlL(),
+                            rating == null ? 0f : rating / 2);
+                })
+                .collect(toList()),
+                books.getTotalPages(), books.getTotalElements());
     }
 
     /** returns the description of a book parsed from the book's page on goodreads */
@@ -116,22 +146,21 @@ public class BookService {
         else return "";
     }
 
-    /** intoarce review-ul pe care un user, identificat prin id, l-a lasat unei carti identificate prin isbn */
-    public Review getReview(Long userId, String isbn) {
-        return reviewRepository.findByUserIdAndIsbn(userId,isbn);
-    }
-
     public void saveReview(Review review) {
         reviewRepository.save(review);
     }
 
     /** intoarce lista tuturor review-urilor primite de o carte identificata prin isbn */
-    public List<IBookReview> getReviewsForBook(String isbn) {
-        return reviewRepository.findReviewsForBook(isbn);
-    }
-
-    public void deleteReview(Long id) {
-        reviewRepository.deleteById(id);
+    @Transactional
+    public List<BookReview> getReviewsForBook(final String isbn) {
+        List<IBookReview> iBookReviewList = reviewRepository.findReviewsForBook(isbn);
+        return iBookReviewList.stream()
+                .map(r -> {
+                    Integer rating = this.bookRatingRepository.findByBookRatingIdUserIdAndBookRatingIdIsbn(r.getUser_Id(), isbn).getBookRating();
+                    Float ratingF = rating==null ? 0f : rating/2f;
+                    return new BookReview(r.getUsername(), ratingF, r.getText());
+                })
+                .collect(toList());
     }
 }
 

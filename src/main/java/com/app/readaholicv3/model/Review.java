@@ -31,6 +31,12 @@ public class Review {
         this.text = "";
     }
 
+    public Review(Long userId, String isbn, String text) {
+        this.userId = userId;
+        this.isbn = isbn;
+        this.text = text;
+    }
+
     public Long getId() {
         return id;
     }
